@@ -55,7 +55,7 @@ export function Header({ userInfo }: HeaderProps) {
 
         {/* Logo - Centralizado */}
         <div className="flex-1 flex justify-center">
-          <div className="relative w-[150px] md:w-[200px] h-[32px] md:h-[42px]">
+          <div className="relative w-[250px] md:w-[300px] h-[42px] md:h-[52px]">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/epamig_logo-2vMg7oM4pTh8E3aN8ywr6xeKCiKxLh.svg"
               alt="EPAMIG Logo"

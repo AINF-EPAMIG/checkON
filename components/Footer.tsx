@@ -9,8 +9,8 @@ export function Footer() {
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/epamig_logo-2vMg7oM4pTh8E3aN8ywr6xeKCiKxLh.svg"
               alt="EPAMIG Logo"
-              width={100}
-              height={42}
+              width={150}
+              height={62}
               className="brightness-0 invert"
             />
           </div>
@@ -21,9 +21,9 @@ export function Footer() {
             <p className="text-xs md:text-sm mt-2">Desenvolvimento: AINF - Assessoria de Informática</p>
           </div>
           <div className="text-xs md:text-sm text-center md:text-right">
-            <p className="font-semibold">Contato:</p>
-            <p>Email: contato@epamig.br</p>
-            <p>Telefone: (31) 3489-5000</p>
+            <p className="font-bold">Contato</p>
+            <p>Email: ainf@epamig.br</p>
+            <p>Telefone: (31) 3489-5019</p>
           </div>
         </div>
       </div>

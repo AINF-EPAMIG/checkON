@@ -1,15 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { format } from "date-fns"
+import { format, isBefore } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, Loader2 } from "lucide-react"
 import type { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Header } from "@/components/Header"
 import { Footer } from "@/components/Footer"
 import { MobileAccessBlock } from "@/components/MobileAccessBlock"
@@ -24,21 +25,28 @@ interface UserInfo {
   SECAO: string
 }
 
+interface ReportData {
+  data_disparo: string
+  hora_disparo: string
+  hora_validacao: string | null
+  valido_ate: string | null
+}
+
+interface APIResponse {
+  success: boolean
+  data?: ReportData[]
+  error?: string
+}
+
+type StatusType = 'pendente' | 'validado' | 'expirado'
+
 function TableRowSkeleton() {
   return (
     <TableRow>
-      <TableCell>
-        <Skeleton className="h-4 w-24" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-4 w-16" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-4 w-16" />
-      </TableCell>
-      <TableCell>
-        <Skeleton className="h-4 w-20" />
-      </TableCell>
+      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
     </TableRow>
   )
 }
@@ -69,36 +77,32 @@ function RelatoriosSkeleton() {
   )
 }
 
-// Mock data for the table
-const mockData = [
-  { date: "01/05/2023", dispatchTime: "09:00", validationTime: "09:05", status: "Validado" },
-  { date: "02/05/2023", dispatchTime: "10:00", validationTime: "10:10", status: "Validado" },
-  { date: "03/05/2023", dispatchTime: "11:00", validationTime: "-", status: "Pendente" },
-]
-
 export default function RelatoriosPage() {
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     to: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0),
   })
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
-  const { data: session, status } = useSession()
+  const [reportData, setReportData] = useState<ReportData[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isFetching, setIsFetching] = useState(false)
+  const { data: session, status } = useSession()
   const { shouldBlockAccess } = useDeviceCheck()
 
   const fetchUserInfo = async (email: string) => {
     try {
       const response = await fetch(
-        `https://empresade125373.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/AINF22012025.02/1/P/?parameters=email=${email}`,
+        `https://empresade125373.rm.cloudtotvs.com.br:8051/api/framework/v1/consultaSQLServer/RealizaConsulta/AINF22012025.02/1/P/?parameters=email=${encodeURIComponent(email)}`,
         {
           headers: {
             Authorization: "Basic " + btoa("arthur.souza" + ":" + "4518Adz74$"),
           },
-        },
+        }
       )
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error(`Erro ao buscar informações do usuário: ${response.status}`)
       }
 
       const data = await response.json()
@@ -106,7 +110,87 @@ export default function RelatoriosPage() {
         setUserInfo(data[0])
       }
     } catch (error) {
-      console.error("Error fetching user info:", error)
+      console.error("Erro ao buscar informações do usuário:", error)
+      setError("Não foi possível carregar as informações do usuário.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fetchReportData = async () => {
+    if (!session?.user?.email || !date?.from || !date?.to) {
+      console.log('Dados necessários ausentes:', { 
+        email: session?.user?.email, 
+        dateFrom: date?.from, 
+        dateTo: date?.to 
+      })
+      return
+    }
+
+    try {
+      setIsFetching(true)
+      setError(null)
+      const startDate = format(date.from, 'yyyy-MM-dd')
+      const endDate = format(date.to, 'yyyy-MM-dd')
+      
+      const url = `https://epamig.tech/novo_checkon/relatorios.php?email=${encodeURIComponent(session.user.email)}&startDate=${startDate}&endDate=${endDate}`
+      console.log('Buscando dados da URL:', url)
+
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error(`Erro na requisição: ${response.status}`)
+      }
+
+      const result: APIResponse = await response.json()
+      console.log('Dados recebidos:', result)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Erro ao carregar os dados')
+      }
+
+      // Ordenar os dados por data e hora em ordem decrescente
+      const sortedData = [...(result.data || [])].sort((a, b) => {
+        const dateA = `${a.data_disparo}T${a.hora_disparo}`
+        const dateB = `${b.data_disparo}T${b.hora_disparo}`
+        return new Date(dateB).getTime() - new Date(dateA).getTime()
+      })
+
+      setReportData(sortedData)
+    } catch (error) {
+      console.error("Erro ao buscar dados do relatório:", error)
+      setError(error instanceof Error ? error.message : 'Erro ao carregar os dados do relatório')
+      setReportData([])
+    } finally {
+      setIsFetching(false)
+    }
+  }
+
+  const getStatus = (row: ReportData): StatusType => {
+    if (row.hora_validacao) {
+      return 'validado'
+    }
+    
+    if (row.valido_ate) {
+      const validoAteDate = new Date(`${row.valido_ate}`)
+      const now = new Date()
+      if (isBefore(validoAteDate, now)) {
+        return 'expirado'
+      }
+    }
+    
+    return 'pendente'
+  }
+
+  const getStatusStyle = (status: StatusType) => {
+    switch (status) {
+      case 'pendente':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'validado':
+        return 'bg-green-100 text-green-800'
+      case 'expirado':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -116,17 +200,18 @@ export default function RelatoriosPage() {
     }
   }, [status, session])
 
-  // Simulate loading
-  useState(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1000)
-    return () => clearTimeout(timer)
-  })
+  useEffect(() => {
+    if (status === "authenticated" && date?.from && date?.to) {
+      fetchReportData()
+    }
+  }, [status, date])
 
   if (shouldBlockAccess) {
     return <MobileAccessBlock />
   }
 
-  if (status === "loading" || isLoading) {
+  // Loading state para todos os cenários de carregamento
+  if (status === "loading" || isLoading || !userInfo) {
     return (
       <div className="min-h-screen flex flex-col bg-zinc-50">
         <Header userInfo={null} />
@@ -142,16 +227,27 @@ export default function RelatoriosPage() {
     <div className="min-h-screen flex flex-col bg-zinc-50">
       <Header userInfo={userInfo} />
 
-      {/* Main Content */}
       <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-zinc-800 mb-6">Relatórios</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-zinc-800">Relatórios de Validação</h2>
+            {isFetching && (
+              <div className="flex items-center text-sm text-zinc-500">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Carregando...
+              </div>
+            )}
+          </div>
+
           <div className="mb-5">
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant={"outline"}
-                  className={cn("w-[300px] justify-start text-left font-normal", !date && "text-muted-foreground")}
+                  className={cn(
+                    "w-[300px] justify-start text-left font-normal",
+                    !date && "text-muted-foreground"
+                  )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {date?.from ? (
@@ -176,30 +272,64 @@ export default function RelatoriosPage() {
                   selected={date}
                   onSelect={setDate}
                   numberOfMonths={2}
+                  locale={ptBR}
                 />
               </PopoverContent>
             </Popover>
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Hora de Disparo</TableHead>
-                <TableHead>Hora de Validação</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockData.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>{row.date}</TableCell>
-                  <TableCell>{row.dispatchTime}</TableCell>
-                  <TableCell>{row.validationTime}</TableCell>
-                  <TableCell>{row.status}</TableCell>
+
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Hora de Disparo</TableHead>
+                  <TableHead>Hora de Validação</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {reportData.length > 0 ? (
+                  reportData.map((row, index) => {
+                    const status = getStatus(row)
+                    return (
+                      <TableRow key={index}>
+                        <TableCell>
+                          {format(new Date(`${row.data_disparo}T${row.hora_disparo}`), 'dd/MM/yyyy')}
+                        </TableCell>
+                        <TableCell>{row.hora_disparo}</TableCell>
+                        <TableCell>{row.hora_validacao || '-'}</TableCell>
+                        <TableCell>
+                          <span className={cn(
+                            "px-2 py-1 rounded-full text-xs font-medium",
+                            getStatusStyle(status)
+                          )}>
+                            {status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-4 text-zinc-500">
+                      {isFetching ? (
+                        <span>Carregando dados...</span>
+                      ) : (
+                        <span>Nenhum registro encontrado para o período selecionado</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </main>
 
@@ -207,4 +337,3 @@ export default function RelatoriosPage() {
     </div>
   )
 }
-

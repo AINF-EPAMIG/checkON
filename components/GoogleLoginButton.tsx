@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
-export function GoogleLoginButton() {
+interface GoogleLoginButtonProps {
+  className?: string;
+}
+
+export function GoogleLoginButton({ className = '' }: GoogleLoginButtonProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -24,7 +28,7 @@ export function GoogleLoginButton() {
     <Button
       onClick={handleSignIn}
       disabled={isLoading}
-      className="bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm inline-flex items-center justify-center transition-colors w-full max-w-[200px] text-sm"
+      className={`bg-white hover:bg-gray-50 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg shadow-sm inline-flex items-center justify-center transition-colors w-full max-w-[200px] text-sm ${className}`}
     >
       {isLoading ? (
         <>

@@ -17,7 +17,7 @@ export default function Home() {
 
       {/* Right side - Logo and login */}
       <div className="lg:w-1/5 flex flex-col items-center justify-center p-8 h-[60vh] lg:h-screen bg-white">
-        <div className="w-full max-w-[200px] lg:max-w-[240px] aspect-[280/120] relative mb-8">
+        <div className="w-full max-w-[300px] lg:max-w-[340px] aspect-[280/120] relative mb-8">
           <Image
             src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/epamig_logo-2vMg7oM4pTh8E3aN8ywr6xeKCiKxLh.svg"
             alt="EPAMIG Logo"
