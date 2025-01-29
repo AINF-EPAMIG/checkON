@@ -3,8 +3,9 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import { MobileMenu } from "./MobileMenu"
+import { LogOut } from "lucide-react"
 
 interface UserInfo {
   NOME_COMPLETO: string
@@ -28,6 +29,10 @@ function UserInfoSkeleton() {
 
 export function Header({ userInfo }: HeaderProps) {
   const { data: session } = useSession()
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" })
+  }
 
   return (
     <header className="bg-primary text-primary-foreground shadow-md">
@@ -82,7 +87,7 @@ export function Header({ userInfo }: HeaderProps) {
                 Relatórios
               </Link>
             </li>
-            {(session?.user?.role === "Chefia" || session?.user?.role === "Administrador") && (
+            {(session?.user?.role === "Chefia") && (
               <li>
                 <Link href="/minha-equipe" className="hover:text-zinc-200 transition-colors">
                   Minha Equipe
@@ -96,6 +101,11 @@ export function Header({ userInfo }: HeaderProps) {
                 </Link>
               </li>
             )}
+            <li>
+              <button onClick={handleLogout} className="flex items-center hover:text-zinc-200 transition-colors">
+                <LogOut size={20} />
+              </button>
+            </li>
           </ul>
         </nav>
 

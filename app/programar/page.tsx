@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import { MobileAccessBlock } from "@/components/MobileAccessBlock";
 import { cn } from "@/lib/utils";
 import { useDeviceCheck } from "@/hooks/useDeviceCheck";
+import type { DateRange } from "react-day-picker";
 
 interface UserInfo {
   NOME_COMPLETO: string;
@@ -64,7 +65,7 @@ export default function ProgramarPage() {
   const [filiaisSetores, setFiliaisSetores] = useState<FilialSetor[]>([]);
   const [selectedFiliais, setSelectedFiliais] = useState<string[]>([]);
   const [selectedSetores, setSelectedSetores] = useState<string[]>([]);
-  const [date, setDate] = useState<Date | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const { shouldBlockAccess } = useDeviceCheck();
 
@@ -200,58 +201,62 @@ export default function ProgramarPage() {
 
       for (const user of users) {
         try {
-          if (!date) throw new Error("Data não selecionada");
+          if (!dateRange || !dateRange.from || !dateRange.to) throw new Error("Data não selecionada");
 
-          const selectedDate = format(date, "yyyy-MM-dd");
-          console.log(`Processando usuário: ${user.EMAIL}`);
+          // Gerar uma lista de datas entre dateRange.from e dateRange.to
+          const startDate = new Date(dateRange.from);
+          const endDate = new Date(dateRange.to);
+          const dateArray = [];
 
-          // Gerar horários aleatórios dentro dos intervalos especificados
-          const morningHour = 9 + Math.floor(Math.random() * 2); // 9-10h
-          const morningMinute = Math.floor(Math.random() * 60);
-          const afternoonHour = 13 + Math.floor(Math.random() * 3); // 13-15h
-          const afternoonMinute = Math.floor(Math.random() * 60);
-
-          const morningTime = `${selectedDate} ${String(morningHour).padStart(
-            2,
-            "0"
-          )}:${String(morningMinute).padStart(2, "0")}:00`;
-          const afternoonTime = `${selectedDate} ${String(
-            afternoonHour
-          ).padStart(2, "0")}:${String(afternoonMinute).padStart(2, "0")}:00`;
-
-          console.log(
-            `Horários gerados para ${user.EMAIL}: Manhã - ${morningTime}, Tarde - ${afternoonTime}`
-          );
-
-          // Enviar ambos períodos em uma única requisição
-          const response = await fetch(
-            "https://epamig.tech/novo_checkon/novo_disparo.php",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                email: user.EMAIL,
-                nome: user.NOME,
-                setor: user.SECAO,
-                filial: user.FILIAL,
-                morningTime,
-                afternoonTime,
-              }),
-            }
-          );
-
-          const responseData = await response.json();
-          console.log(`Resposta do servidor para ${user.EMAIL}:`, responseData);
-
-          if (!response.ok) {
-            throw new Error(
-              responseData.error || `Erro no usuário ${user.EMAIL}`
-            );
+          for (let d = startDate; d <= endDate; d.setDate(d.getDate() + 1)) {
+            dateArray.push(new Date(d));
           }
 
-          successCount += 2;
+          for (const date of dateArray) {
+            const selectedDate = format(date, "yyyy-MM-dd");
+            console.log(`Processando usuário: ${user.EMAIL} para a data ${selectedDate}`);
+
+            // Gerar horários aleatórios dentro dos intervalos especificados
+            const morningHour = 9 + Math.floor(Math.random() * 2); // 9-10h
+            const morningMinute = Math.floor(Math.random() * 60);
+            const afternoonHour = 13 + Math.floor(Math.random() * 3); // 13-15h
+            const afternoonMinute = Math.floor(Math.random() * 60);
+
+            const morningTime = `${selectedDate} ${String(morningHour).padStart(2, "0")}:${String(morningMinute).padStart(2, "0")}:00`;
+            const afternoonTime = `${selectedDate} ${String(afternoonHour).padStart(2, "0")}:${String(afternoonMinute).padStart(2, "0")}:00`;
+
+            console.log(`Horários gerados para ${user.EMAIL}: Manhã - ${morningTime}, Tarde - ${afternoonTime}`);
+
+            // Enviar ambos períodos em uma única requisição
+            const response = await fetch(
+              "https://epamig.tech/novo_checkon/novo_disparo.php",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  email: user.EMAIL,
+                  nome: user.NOME,
+                  setor: user.SECAO,
+                  filial: user.FILIAL,
+                  morningTime,
+                  afternoonTime,
+                }),
+              }
+            );
+
+            const responseData = await response.json();
+            console.log(`Resposta do servidor para ${user.EMAIL}:`, responseData);
+
+            if (!response.ok) {
+              throw new Error(
+                responseData.error || `Erro no usuário ${user.EMAIL}`
+              );
+            }
+
+            successCount += 2;
+          }
         } catch (error) {
           console.error(`Erro processando usuário ${user.EMAIL}:`, error);
           errorCount += 2;
@@ -328,9 +333,9 @@ export default function ProgramarPage() {
       case 1:
         return true;
       case 2:
-        return !!date;
+        return !!dateRange;
       case 3:
-        return !!date && selectedFiliais.length > 0;
+        return !!dateRange && selectedFiliais.length > 0;
       default:
         return false;
     }
@@ -397,49 +402,51 @@ export default function ProgramarPage() {
                 {submitStatus.message}
               </div>
             )}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                  1
+                </div>
+                <h3 className="text-lg font-semibold">Selecione o intervalo de datas</h3>
+              </div>
+              <div className="ml-10">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !dateRange && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {dateRange?.from && dateRange.to ? (
+                        <>
+                          {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                          {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                        </>
+                      ) : (
+                        <span>Selecione um intervalo de datas</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      initialFocus
+                      mode="range"
+                      selected={dateRange}
+                      onSelect={setDateRange}
+                      numberOfMonths={2}
+                      locale={ptBR}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
           </div>
 
           <ScrollArea className="h-[calc(100vh-24rem)] p-6">
             <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
-                  <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                    1
-                  </div>
-                  <h3 className="text-lg font-semibold">Selecione a data</h3>
-                </div>
-                <div className="ml-10">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? (
-                          format(date, "dd/MM/yyyy", { locale: ptBR })
-                        ) : (
-                          <span>Selecione uma data</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        initialFocus
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        numberOfMonths={2}
-                        locale={ptBR}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
               {isStepVisible(2) && (
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
@@ -565,7 +572,7 @@ export default function ProgramarPage() {
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              disabled={!date || selectedSetores.length === 0 || isSubmitting}
+              disabled={!dateRange || selectedSetores.length === 0 || isSubmitting}
               onClick={handleSubmit}
             >
               {isSubmitting ? "Processando..." : "Enviar"}
