@@ -56,6 +56,7 @@ export function Header({ userInfo }: HeaderProps) {
         {/* Logo - Centralizado */}
         <div className="flex-1 flex justify-center">
           <div className="relative w-[250px] md:w-[300px] h-[42px] md:h-[52px]">
+            <Link href="/validar">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/epamig_logo-2vMg7oM4pTh8E3aN8ywr6xeKCiKxLh.svg"
               alt="EPAMIG Logo"
@@ -64,6 +65,7 @@ export function Header({ userInfo }: HeaderProps) {
               className="brightness-0 invert"
               style={{ objectFit: "contain" }}
             />
+            </Link>
           </div>
         </div>
 

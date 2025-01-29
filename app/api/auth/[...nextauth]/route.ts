@@ -2,8 +2,8 @@ import NextAuth from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 
 // Arrays para armazenar emails de administradores e chefes
-const adminEmails = ["arthur.souza@epamig.br", "admin1@epamig.br", "admin2@epamig.br", "admin3@epamig.br"]
-const chiefEmails = ["chief1@epamig.br", "chief2@epamig.br", "chief3@epamig.br", "chief4@epamig.br"]
+const adminEmails = ["arthur.souza@epamig.br", "rodolfo.fernandes@epamig.br", "andrezza.fernandes@epamig.br"]
+const chiefEmails = ["andrezza.fernandes@epamig.br"]
 
 // Função para determinar o papel do usuário
 function getUserRole(email: string) {

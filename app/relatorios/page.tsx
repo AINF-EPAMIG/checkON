@@ -38,7 +38,7 @@ interface APIResponse {
   error?: string
 }
 
-type StatusType = 'pendente' | 'validado' | 'expirado'
+type StatusType = 'validado' | 'expirado'
 
 function TableRowSkeleton() {
   return (
@@ -90,6 +90,33 @@ export default function RelatoriosPage() {
   const { data: session, status } = useSession()
   const { shouldBlockAccess } = useDeviceCheck()
 
+  const getStatus = (row: ReportData): StatusType | null => {
+    if (row.hora_validacao) {
+      return 'validado'
+    }
+    
+    if (row.valido_ate) {
+      const validoAteDate = new Date(`${row.valido_ate}`)
+      const now = new Date()
+      if (isBefore(validoAteDate, now)) {
+        return 'expirado'
+      }
+    }
+    
+    return null
+  }
+
+  const getStatusStyle = (status: StatusType) => {
+    switch (status) {
+      case 'validado':
+        return 'bg-green-100 text-green-800'
+      case 'expirado':
+        return 'bg-red-100 text-red-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
   const fetchUserInfo = async (email: string) => {
     try {
       const response = await fetch(
@@ -134,7 +161,6 @@ export default function RelatoriosPage() {
       const endDate = format(date.to, 'yyyy-MM-dd')
       
       const url = `https://epamig.tech/novo_checkon/relatorios.php?email=${encodeURIComponent(session.user.email)}&startDate=${startDate}&endDate=${endDate}`
-      console.log('Buscando dados da URL:', url)
 
       const response = await fetch(url)
       if (!response.ok) {
@@ -142,55 +168,29 @@ export default function RelatoriosPage() {
       }
 
       const result: APIResponse = await response.json()
-      console.log('Dados recebidos:', result)
 
       if (!result.success) {
         throw new Error(result.error || 'Erro ao carregar os dados')
       }
 
-      // Ordenar os dados por data e hora em ordem decrescente
-      const sortedData = [...(result.data || [])].sort((a, b) => {
-        const dateA = `${a.data_disparo}T${a.hora_disparo}`
-        const dateB = `${b.data_disparo}T${b.hora_disparo}`
-        return new Date(dateB).getTime() - new Date(dateA).getTime()
-      })
+      const filteredAndSortedData = (result.data || [])
+        .filter(row => {
+          const status = getStatus(row)
+          return status === 'validado' || status === 'expirado'
+        })
+        .sort((a, b) => {
+          const dateA = `${a.data_disparo}T${a.hora_disparo}`
+          const dateB = `${b.data_disparo}T${b.hora_disparo}`
+          return new Date(dateB).getTime() - new Date(dateA).getTime()
+        })
 
-      setReportData(sortedData)
+      setReportData(filteredAndSortedData)
     } catch (error) {
       console.error("Erro ao buscar dados do relatório:", error)
       setError(error instanceof Error ? error.message : 'Erro ao carregar os dados do relatório')
       setReportData([])
     } finally {
       setIsFetching(false)
-    }
-  }
-
-  const getStatus = (row: ReportData): StatusType => {
-    if (row.hora_validacao) {
-      return 'validado'
-    }
-    
-    if (row.valido_ate) {
-      const validoAteDate = new Date(`${row.valido_ate}`)
-      const now = new Date()
-      if (isBefore(validoAteDate, now)) {
-        return 'expirado'
-      }
-    }
-    
-    return 'pendente'
-  }
-
-  const getStatusStyle = (status: StatusType) => {
-    switch (status) {
-      case 'pendente':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'validado':
-        return 'bg-green-100 text-green-800'
-      case 'expirado':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -210,7 +210,6 @@ export default function RelatoriosPage() {
     return <MobileAccessBlock />
   }
 
-  // Loading state para todos os cenários de carregamento
   if (status === "loading" || isLoading || !userInfo) {
     return (
       <div className="min-h-screen flex flex-col bg-zinc-50">
@@ -230,7 +229,7 @@ export default function RelatoriosPage() {
       <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow-lg rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-zinc-800">Relatórios de Validação</h2>
+            <h2 className="text-2xl font-bold text-zinc-800">Relatório de Validações</h2>
             {isFetching && (
               <div className="flex items-center text-sm text-zinc-500">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -295,9 +294,11 @@ export default function RelatoriosPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reportData.length > 0 ? (
+              {reportData.length > 0 ? (
                   reportData.map((row, index) => {
                     const status = getStatus(row)
+                    if (!status) return null // Não renderiza itens pendentes
+
                     return (
                       <TableRow key={index}>
                         <TableCell>
@@ -322,7 +323,7 @@ export default function RelatoriosPage() {
                       {isFetching ? (
                         <span>Carregando dados...</span>
                       ) : (
-                        <span>Nenhum registro encontrado para o período selecionado</span>
+                        <span>Nenhum registro validado ou expirado encontrado para o período selecionado</span>
                       )}
                     </TableCell>
                   </TableRow>
