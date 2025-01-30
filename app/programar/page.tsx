@@ -95,13 +95,13 @@ export default function ProgramarPage() {
       router.push("/");
       return;
     }
-    
+
     if (status === "authenticated") {
       if (session?.user?.role !== "Administrador") {
         router.push("/access-denied");
         return;
       }
-      
+
       if (session?.user?.email) {
         fetchUserInfo(session.user.email);
         fetchFiliaisSetores();
@@ -201,7 +201,8 @@ export default function ProgramarPage() {
 
       for (const user of users) {
         try {
-          if (!dateRange || !dateRange.from || !dateRange.to) throw new Error("Data não selecionada");
+          if (!dateRange || !dateRange.from || !dateRange.to)
+            throw new Error("Data não selecionada");
 
           // Gerar uma lista de datas entre dateRange.from e dateRange.to
           const startDate = new Date(dateRange.from);
@@ -214,7 +215,9 @@ export default function ProgramarPage() {
 
           for (const date of dateArray) {
             const selectedDate = format(date, "yyyy-MM-dd");
-            console.log(`Processando usuário: ${user.EMAIL} para a data ${selectedDate}`);
+            console.log(
+              `Processando usuário: ${user.EMAIL} para a data ${selectedDate}`
+            );
 
             // Gerar horários aleatórios dentro dos intervalos especificados
             const morningHour = 9 + Math.floor(Math.random() * 2); // 9-10h
@@ -222,10 +225,17 @@ export default function ProgramarPage() {
             const afternoonHour = 13 + Math.floor(Math.random() * 3); // 13-15h
             const afternoonMinute = Math.floor(Math.random() * 60);
 
-            const morningTime = `${selectedDate} ${String(morningHour).padStart(2, "0")}:${String(morningMinute).padStart(2, "0")}:00`;
-            const afternoonTime = `${selectedDate} ${String(afternoonHour).padStart(2, "0")}:${String(afternoonMinute).padStart(2, "0")}:00`;
+            const morningTime = `${selectedDate} ${String(morningHour).padStart(
+              2,
+              "0"
+            )}:${String(morningMinute).padStart(2, "0")}:00`;
+            const afternoonTime = `${selectedDate} ${String(
+              afternoonHour
+            ).padStart(2, "0")}:${String(afternoonMinute).padStart(2, "0")}:00`;
 
-            console.log(`Horários gerados para ${user.EMAIL}: Manhã - ${morningTime}, Tarde - ${afternoonTime}`);
+            console.log(
+              `Horários gerados para ${user.EMAIL}: Manhã - ${morningTime}, Tarde - ${afternoonTime}`
+            );
 
             // Enviar ambos períodos em uma única requisição
             const response = await fetch(
@@ -247,7 +257,10 @@ export default function ProgramarPage() {
             );
 
             const responseData = await response.json();
-            console.log(`Resposta do servidor para ${user.EMAIL}:`, responseData);
+            console.log(
+              `Resposta do servidor para ${user.EMAIL}:`,
+              responseData
+            );
 
             if (!response.ok) {
               throw new Error(
@@ -328,14 +341,15 @@ export default function ProgramarPage() {
     return <MobileAccessBlock />;
   }
 
+  // Substitua a função isStepVisible por esta versão atualizada
   const isStepVisible = (step: number) => {
     switch (step) {
       case 1:
         return true;
       case 2:
-        return !!dateRange;
+        return dateRange?.from && dateRange?.to;
       case 3:
-        return !!dateRange && selectedFiliais.length > 0;
+        return dateRange?.from && dateRange?.to && selectedFiliais.length > 0;
       default:
         return false;
     }
@@ -345,8 +359,13 @@ export default function ProgramarPage() {
     <div className="min-h-screen flex flex-col bg-zinc-50">
       <Header userInfo={userInfo} />
 
-      <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex items-start justify-center overflow-hidden">
-        <div className="w-full max-w-2xl bg-white shadow-lg rounded-lg">
+      <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center overflow-hidden">
+        <div
+          className={cn(
+            "w-full max-w-2xl bg-white shadow-lg rounded-lg",
+            dateRange?.from && dateRange?.to ? "items-start" : "max-h-[280px]"
+          )}
+        >
           <div className="p-6 border-b">
             <h2 className="text-2xl font-bold text-zinc-800 text-center">
               Programar CheckON
@@ -407,7 +426,9 @@ export default function ProgramarPage() {
                 <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
                   1
                 </div>
-                <h3 className="text-lg font-semibold">Selecione o intervalo de datas</h3>
+                <h3 className="text-lg font-semibold">
+                  Selecione o intervalo de datas
+                </h3>
               </div>
               <div className="ml-10">
                 <Popover>
@@ -416,13 +437,17 @@ export default function ProgramarPage() {
                       variant={"outline"}
                       className={cn(
                         "w-full justify-start text-left font-normal",
-                        !dateRange && "text-muted-foreground"
+                        !(dateRange?.from && dateRange?.to) &&
+                          "text-muted-foreground"
                       )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateRange?.from && dateRange.to ? (
+                      {dateRange?.from && dateRange?.to ? (
                         <>
-                          {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                          {format(dateRange.from, "dd/MM/yyyy", {
+                            locale: ptBR,
+                          })}{" "}
+                          -{" "}
                           {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
                         </>
                       ) : (
@@ -445,10 +470,17 @@ export default function ProgramarPage() {
             </div>
           </div>
 
-          <ScrollArea className="h-[calc(100vh-24rem)] p-6">
+          <ScrollArea
+            className={cn(
+              dateRange?.from && dateRange?.to
+                ? "h-[calc(100vh-24rem)] opacity-100 transition-all duration-300 ease-in-out"
+                : "h-0 opacity-0",
+              "p-6"
+            )}
+          >
             <form onSubmit={handleSubmit} className="space-y-8">
               {isStepVisible(2) && (
-                <div className="space-y-4">
+                <div className="space-y-4 transition-all duration-300 ease-in-out">
                   <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
                       2
@@ -501,7 +533,7 @@ export default function ProgramarPage() {
               )}
 
               {isStepVisible(3) && (
-                <div className="space-y-4">
+                <div className="space-y-4 transition-all duration-300 ease-in-out">
                   <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
                     <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
                       3
@@ -572,7 +604,11 @@ export default function ProgramarPage() {
             <Button
               type="submit"
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-              disabled={!dateRange || selectedSetores.length === 0 || isSubmitting}
+              disabled={
+                !(dateRange?.from && dateRange?.to) ||
+                selectedSetores.length === 0 ||
+                isSubmitting
+              }
               onClick={handleSubmit}
             >
               {isSubmitting ? "Processando..." : "Enviar"}

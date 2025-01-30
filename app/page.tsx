@@ -7,10 +7,10 @@ export default function Home() {
       {/* Left side - Image */}
       <div className="lg:w-4/5 relative h-[40vh] lg:h-screen">
         <Image
-          src="/50AnosEpamig.png"
+          src="/checkonarte.png"
           alt="Decorative background"
           fill
-          className="object-cover"
+          className="object-fill"
           priority
         />
       </div>

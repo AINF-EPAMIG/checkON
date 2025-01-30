@@ -87,7 +87,7 @@ export function MobileMenu({ userInfo }: MobileMenuProps) {
                   Relatórios
                 </Link>
               </li>
-              {(session?.user?.role === "Chefia" || session?.user?.role === "Administrador") && (
+              {(session?.user?.role === "Chefia") && (
                 <li>
                   <Link
                     href="/minha-equipe"
