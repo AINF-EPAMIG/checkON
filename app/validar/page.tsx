@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { MobileAccessBlock } from "@/components/MobileAccessBlock"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useDeviceCheck } from "@/hooks/useDeviceCheck"
+import { Lock } from "lucide-react"
 
 interface UserInfo {
   NOME_COMPLETO: string
@@ -164,14 +165,17 @@ export default function ValidarPage() {
           )}
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <Input
-              type="text"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Digite o código recebido por e-mail"
-              className="w-full"
-              disabled={isValidating || isValidated}
-            />
+            <div className="relative">
+              <Input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="Digite o código recebido por e-mail"
+                className="w-full pl-10"
+                disabled={isValidating || isValidated}
+              />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" style={{ width: '16px', height: '16px' }} />
+            </div>
             
             <Button 
               type="submit" 
