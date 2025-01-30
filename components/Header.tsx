@@ -87,7 +87,7 @@ export function Header({ userInfo }: HeaderProps) {
                 Relatórios
               </Link>
             </li>
-            {(session?.user?.role === "Chefia") && (
+            {(session?.user?.role === "Chefia" || session?.user?.role === "Administrador") && (
               <li>
                 <Link href="/minha-equipe" className="hover:text-zinc-200 transition-colors">
                   Minha Equipe

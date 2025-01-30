@@ -222,8 +222,8 @@ export default function ProgramarPage() {
             // Gerar horários aleatórios dentro dos intervalos especificados
             const morningHour = 9 + Math.floor(Math.random() * 2); // 9-10h
             const morningMinute = Math.floor(Math.random() * 60);
-            const afternoonHour = 13 + Math.floor(Math.random() * 3); // 13-15h
-            const afternoonMinute = Math.floor(Math.random() * 60);
+            const afternoonHour = 15; // Definindo a hora fixa para 15h
+            const afternoonMinute = 10 + Math.floor(Math.random() * 21); // 10-30 minutos
 
             const morningTime = `${selectedDate} ${String(morningHour).padStart(
               2,
