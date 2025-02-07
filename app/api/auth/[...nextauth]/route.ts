@@ -5,7 +5,6 @@ import GoogleProvider from "next-auth/providers/google";
 const adminEmails = [
   "arthur.souza@epamig.br",
   "rodolfo.fernandes@epamig.br",
-  "andrezza.fernandes@epamig.br",
 ];
 const chiefEmails = ["andrezza.fernandes@epamig.br"];
 

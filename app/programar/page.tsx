@@ -223,7 +223,7 @@ export default function ProgramarPage() {
             const morningHour = 9 + Math.floor(Math.random() * 2); // 9-10h
             const morningMinute = Math.floor(Math.random() * 60);
             const afternoonHour = 15; // Definindo a hora fixa para 15h
-            const afternoonMinute = 10 + Math.floor(Math.random() * 21); // 10-30 minutos
+            const afternoonMinute = 10 + Math.floor(Math.random() * 20); // 10-30 minutos
 
             const morningTime = `${selectedDate} ${String(morningHour).padStart(
               2,
@@ -341,31 +341,12 @@ export default function ProgramarPage() {
     return <MobileAccessBlock />;
   }
 
-  // Substitua a função isStepVisible por esta versão atualizada
-  const isStepVisible = (step: number) => {
-    switch (step) {
-      case 1:
-        return true;
-      case 2:
-        return dateRange?.from && dateRange?.to;
-      case 3:
-        return dateRange?.from && dateRange?.to && selectedFiliais.length > 0;
-      default:
-        return false;
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50">
       <Header userInfo={userInfo} />
 
-      <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center overflow-hidden">
-        <div
-          className={cn(
-            "w-full max-w-2xl bg-white shadow-lg rounded-lg",
-            dateRange?.from && dateRange?.to ? "items-start" : "max-h-[280px]"
-          )}
-        >
+      <main className="flex-grow container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="w-full max-w-6xl bg-white shadow-lg rounded-lg">
           <div className="p-6 border-b">
             <h2 className="text-2xl font-bold text-zinc-800 text-center">
               Programar CheckON
@@ -421,185 +402,220 @@ export default function ProgramarPage() {
                 {submitStatus.message}
               </div>
             )}
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                  1
-                </div>
-                <h3 className="text-lg font-semibold">
-                  Selecione o intervalo de datas
-                </h3>
-              </div>
-              <div className="ml-10">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !(dateRange?.from && dateRange?.to) &&
-                          "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateRange?.from && dateRange?.to ? (
-                        <>
-                          {format(dateRange.from, "dd/MM/yyyy", {
-                            locale: ptBR,
-                          })}{" "}
-                          -{" "}
-                          {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
-                        </>
-                      ) : (
-                        <span>Selecione um intervalo de datas</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      selected={dateRange}
-                      onSelect={setDateRange}
-                      numberOfMonths={2}
-                      locale={ptBR}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
           </div>
 
-          <ScrollArea
-            className={cn(
-              dateRange?.from && dateRange?.to
-                ? "h-[calc(100vh-24rem)] opacity-100 transition-all duration-300 ease-in-out"
-                : "h-0 opacity-0",
-              "p-6"
-            )}
-          >
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {isStepVisible(2) && (
-                <div className="space-y-4 transition-all duration-300 ease-in-out">
-                  <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                      2
-                    </div>
-                    <h3 className="text-lg font-semibold">
-                      Selecione as filiais
-                    </h3>
-                  </div>
-                  <div className="ml-10 space-y-2">
+          <ScrollArea className="h-[calc(100vh-24rem)]">
+            <form onSubmit={handleSubmit} className="p-4 sm:p-6">
+              <div className="flex flex-col lg:flex-row items-start gap-4 sm:gap-8">
+                {/* Passo 1 - Seleção de Data */}
+                <div className="w-full lg:w-72 flex-shrink-0">
+                  <div className="space-y-4">
                     <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="select-all-filiais"
-                        checked={
-                          selectedFiliais.length === uniqueFiliais.length
-                        }
-                        onCheckedChange={handleSelectAllFiliais}
-                      />
-                      <label
-                        htmlFor="select-all-filiais"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Selecionar todos
-                      </label>
-                    </div>
-                    {uniqueFiliais.map((filial) => (
-                      <div key={filial} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`filial-${filial}`}
-                          checked={selectedFiliais.includes(filial)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              setSelectedFiliais([...selectedFiliais, filial]);
-                            } else {
-                              setSelectedFiliais(
-                                selectedFiliais.filter((f) => f !== filial)
-                              );
-                            }
-                          }}
-                        />
-                        <label
-                          htmlFor={`filial-${filial}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          {filial}
-                        </label>
+                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        1
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {isStepVisible(3) && (
-                <div className="space-y-4 transition-all duration-300 ease-in-out">
-                  <div className="flex items-center space-x-2 sticky top-0 bg-white py-2">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                      3
+                      <div>
+                        <h3 className="text-lg font-semibold">Período</h3>
+                        <span className="text-sm text-muted-foreground">Selecione o intervalo de datas</span>
+                      </div>
                     </div>
-                    <h3 className="text-lg font-semibold">
-                      Selecione os setores
-                    </h3>
-                  </div>
-                  <div className="ml-10 space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="select-all-setores"
-                        checked={
-                          selectedSetores.length ===
-                          filiaisSetores.filter((item) =>
-                            selectedFiliais.includes(item.FILIAL)
-                          ).length
-                        }
-                        onCheckedChange={handleSelectAllSetores}
-                      />
-                      <label
-                        htmlFor="select-all-setores"
-                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        Selecionar todos
-                      </label>
-                    </div>
-                    {filiaisSetores
-                      .filter((item) => selectedFiliais.includes(item.FILIAL))
-                      .map((item) => (
-                        <div
-                          key={`${item.FILIAL}-${item.SETOR}`}
-                          className="flex items-center space-x-2"
+                    
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-12 sm:h-16",
+                            !dateRange?.from && "text-muted-foreground",
+                            dateRange?.from && "border-2 border-primary"
+                          )}
                         >
-                          <Checkbox
-                            id={`setor-${item.SETOR}`}
-                            checked={selectedSetores.includes(item.SETOR)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setSelectedSetores([
-                                  ...selectedSetores,
-                                  item.SETOR,
-                                ]);
-                              } else {
-                                setSelectedSetores(
-                                  selectedSetores.filter(
-                                    (s) => s !== item.SETOR
-                                  )
-                                );
-                              }
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {dateRange?.from ? (
+                            dateRange.to ? (
+                              <>
+                                <span className="block text-sm">
+                                  De: {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })}
+                                </span>
+                                <span className="block text-sm ml-2">
+                                  Até: {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-sm">
+                                {format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })}
+                              </span>
+                            )
+                          ) : (
+                            <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm">
+                              <span>De: --/--/----</span>
+                              <span>Até: --/--/----</span>
+                            </div>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <div className="p-4">
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Selecione a data inicial e depois a final
+                          </p>
+                          <Calendar
+                            initialFocus
+                            mode="range"
+                            selected={dateRange}
+                            onSelect={setDateRange}
+                            numberOfMonths={1}
+                            locale={ptBR}
+                            classNames={{
+                              day_range_middle: "bg-accent/50",
+                              day_today: "border border-primary"
                             }}
                           />
-                          <label
-                            htmlFor={`setor-${item.SETOR}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {item.DESCRICAO}
-                          </label>
                         </div>
-                      ))}
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
-              )}
+
+                {/* Passo 2 - Filiais */}
+                <div className={cn(
+                  "w-full lg:w-96 flex-shrink-0 transition-all duration-300",
+                  dateRange?.from && dateRange?.to ? "opacity-100" : "opacity-50"
+                )}>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        2
+                      </div>
+                        <h3 className="text-lg font-semibold">Filiais</h3>
+                    </div>
+                    
+                    {dateRange?.from && dateRange?.to ? (
+                      <div className="ml-4 sm:ml-10 space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="select-all-filiais"
+                              checked={selectedFiliais.length === uniqueFiliais.length}
+                              onCheckedChange={handleSelectAllFiliais}
+                            />
+                            <label 
+                              htmlFor="select-all-filiais" 
+                              className="font-bold"
+                            >
+                              Selecionar todos
+                            </label>
+                          </div>
+                          {uniqueFiliais.map((filial) => (
+                            <div key={filial} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`filial-${filial}`}
+                                checked={selectedFiliais.includes(filial)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    setSelectedFiliais([...selectedFiliais, filial]);
+                                  } else {
+                                    setSelectedFiliais(
+                                      selectedFiliais.filter((f) => f !== filial)
+                                    );
+                                  }
+                                }}
+                              />
+                              <label
+                                htmlFor={`filial-${filial}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              >
+                                {filial}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="ml-4 sm:ml-10 text-sm text-muted-foreground">
+                        Selecione as datas primeiro
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Passo 3 - Setores */}
+                <div className={cn(
+                  "w-full lg:w-96 flex-shrink-0 transition-all duration-300",
+                  selectedFiliais.length > 0 ? "opacity-100" : "opacity-50"
+                )}>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                        3
+                      </div>
+                        <h3 className="text-lg font-semibold">Setores</h3>
+                    </div>
+
+                    {selectedFiliais.length > 0 ? (
+                      <div className="ml-4 sm:ml-10 space-y-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="select-all-setores"
+                              checked={selectedSetores.length === filiaisSetores.filter(item => 
+                                selectedFiliais.includes(item.FILIAL)).length}
+                              onCheckedChange={handleSelectAllSetores}
+                            />
+                            <label 
+                              htmlFor="select-all-setores" 
+                              className="font-bold"
+                            >
+                              Selecionar todos
+                            </label>
+                          </div>
+                          {filiaisSetores
+                            .filter((item) => selectedFiliais.includes(item.FILIAL))
+                            .map((item) => (
+                              <div
+                                key={`${item.FILIAL}-${item.SETOR}`}
+                                className="flex items-center space-x-2"
+                              >
+                                <Checkbox
+                                  id={`setor-${item.SETOR}`}
+                                  checked={selectedSetores.includes(item.SETOR)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedSetores([
+                                        ...selectedSetores,
+                                        item.SETOR,
+                                      ]);
+                                    } else {
+                                      setSelectedSetores(
+                                        selectedSetores.filter(
+                                          (s) => s !== item.SETOR
+                                        )
+                                      );
+                                    }
+                                  }}
+                                />
+                                <label
+                                  htmlFor={`setor-${item.SETOR}`}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                  {item.DESCRICAO}
+                                </label>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="ml-4 sm:ml-10 text-sm text-muted-foreground">
+                        Selecione filiais primeiro
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
             </form>
           </ScrollArea>
 
+          {/* Botão de envio */}
           <div className="p-6 border-t">
             <Button
               type="submit"
