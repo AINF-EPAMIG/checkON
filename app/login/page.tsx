@@ -1,7 +1,7 @@
 "use client"
 
 import { FormEvent, Suspense, useCallback, useEffect, useMemo, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Loader2, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { signIn } from "next-auth/react"
 
 function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [cpf, setCpf] = useState("")
   const [chapa, setChapa] = useState("")
@@ -58,19 +57,29 @@ function LoginForm() {
 
       if (response?.error) {
         setError("Falha ao autenticar com o Google.")
+        setIsLoading(false)
         return
       }
 
-      if (response?.url) {
-        router.push(response.url)
+      if (response?.ok) {
+        // Aguardar um momento para garantir que a sessão foi criada
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        // Obter a URL de redirecionamento baseada no nível do usuário
+        const redirectResponse = await fetch("/api/auth/redirect-url")
+        if (redirectResponse.ok) {
+          const { redirectUrl } = await redirectResponse.json()
+          window.location.href = redirectUrl
+        } else {
+          window.location.href = "/"
+        }
         return
       }
     } catch {
       setError("Ocorreu um erro inesperado. Tente novamente.")
-    } finally {
       setIsLoading(false)
     }
-  }, [router])
+  }, [])
 
   const handleCredentialsLogin = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -92,21 +101,31 @@ function LoginForm() {
           setCredentialsError(
             errorMessages[response.error] ?? "Não foi possível validar as credenciais.",
           )
+          setIsCredentialsLoading(false)
           return
         }
 
         // Login bem-sucedido - redirecionar
         if (response?.ok) {
-          router.push(response.url || "/")
+          // Aguardar um momento para garantir que a sessão foi criada
+          await new Promise(resolve => setTimeout(resolve, 100))
+          
+          // Obter a URL de redirecionamento baseada no nível do usuário
+          const redirectResponse = await fetch("/api/auth/redirect-url")
+          if (redirectResponse.ok) {
+            const { redirectUrl } = await redirectResponse.json()
+            window.location.href = redirectUrl
+          } else {
+            window.location.href = "/"
+          }
           return
         }
       } catch {
         setCredentialsError("Ocorreu um erro inesperado. Tente novamente.")
-      } finally {
         setIsCredentialsLoading(false)
       }
     },
-    [cpf, chapa, errorMessages, router],
+    [cpf, chapa, errorMessages],
   )
 
   return (

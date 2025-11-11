@@ -15,7 +15,7 @@ export default async function AgendarFolgaPage() {
   const statusChefia = await obterStatusChefia(session.user?.colaborador)
 
   if (!statusChefia.isChefe) {
-    redirect("/")
+    redirect("/user/minhas-folgas")
   }
 
   return <AgendarFolgaClient />

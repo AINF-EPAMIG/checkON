@@ -2,19 +2,38 @@
 
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login")
+      return
     }
-  }, [status, router])
 
-  if (status === "loading") {
+    if (status === "authenticated" && session?.user?.colaborador && !isRedirecting) {
+      setIsRedirecting(true)
+      
+      // Obter a URL de redirecionamento baseada no nível do usuário
+      fetch("/api/auth/redirect-url")
+        .then(res => res.json())
+        .then(data => {
+          if (data.redirectUrl) {
+            router.push(data.redirectUrl)
+          }
+        })
+        .catch(() => {
+          // Em caso de erro, manter na página inicial
+          setIsRedirecting(false)
+        })
+    }
+  }, [status, session, router, isRedirecting])
+
+  if (status === "loading" || isRedirecting) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
