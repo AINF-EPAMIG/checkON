@@ -1,13 +1,13 @@
-import "./globals.css"
-import { Nunito } from "next/font/google"
-import ClientWrapper from "@/components/ClientWrapper"
-import { RoleProvider } from "@/components/RoleProvider"
+import type { Metadata } from 'next'
+import { GeistSans } from 'geist/font/sans'
+import './globals.css'
+import { AuthProvider } from '@/components/AuthProvider'
+import { Header } from '@/components/Layout/header'
 
-const nunito = Nunito({ subsets: ["latin"] })
 
-export const metadata = {
-  title: "Check ON",
-  description: "Authentication system",
+export const metadata: Metadata = {
+  title: 'Sistema CheckON',
+  description: 'Sistema CheckON EPAMIG - Empresa de Pesquisa Agropecuária de Minas Gerais',
 }
 
 export default function RootLayout({
@@ -17,12 +17,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={nunito.className}>
-        <ClientWrapper>
-          <RoleProvider>
-            {children}
-          </RoleProvider>
-        </ClientWrapper>
+      <body className={GeistSans.className}>
+        <AuthProvider>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+
+            <main className="flex-1">
+              {children}
+            </main>
+          </div>
+        </AuthProvider>
       </body>
     </html>
   )

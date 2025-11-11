@@ -1,51 +1,42 @@
-import Image from "next/image";
-import { GoogleLoginButton } from "@/components/GoogleLoginButton";
+"use client"
+
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function Home() {
-  return (
-    <main className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 md:p-8">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/bg_checkon.png"
-          alt="Decorative background"
-          fill
-          priority
-          className="object-cover"
-        />
-      </div>
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-      {/* Glass Card Container */}
-      <div className="relative z-10 w-full max-w-sm sm:max-w-md md:max-w-lg">
-        <div className="backdrop-blur-md bg-white/30 rounded-2xl shadow-lg p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center">
-          {/* Logo Container */}
-          <div className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] flex flex-col gap-2 mb-6 sm:mb-8 md:mb-10">
-            {/* CHECK ON Logo */}
-            <div className="relative aspect-[280/120] scale-125 sm:scale-150 md:scale-[1.75]">
-              <Image
-                src="/logo_checkon.svg"
-                alt="CHECK ON Logo"
-                fill
-                priority
-                style={{ objectFit: "contain" }}
-              />
-            </div>
-            {/* EPAMIG Logo */}
-            <div className="relative aspect-[280/120] md:scale-[1.25]">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/epamig_logo-2vMg7oM4pTh8E3aN8ywr6xeKCiKxLh.svg"
-                alt="EPAMIG Logo"
-                fill
-                priority
-                style={{ objectFit: "contain" }}
-              />
-            </div>
-          </div>
-          <div className="w-full flex justify-center transform scale-100 sm:scale-110 md:scale-125">
-            <GoogleLoginButton />
-          </div>
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+    }
+  }, [status, router])
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-gray-600">Carregando...</p>
         </div>
       </div>
-    </main>
-  );
+    )
+  }
+
+  if (!session) {
+    return null
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-[#1e7b4f] mb-6">
+        Bem-vindo, {session.user?.name}!
+      </h1>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Adicione aqui os cards ou conteúdo da página inicial */}
+      </div>
+    </div>
+  )
 }
