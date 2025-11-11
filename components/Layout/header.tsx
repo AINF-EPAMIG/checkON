@@ -18,13 +18,45 @@ import {
 import { useChefiaStatus } from "@/lib/hooks/useChefiaStatus";
 
 const getInitials = (name: string | null | undefined): string => {
-  return name
-    ? name
-        .split(" ")
-        .map((n: string) => n[0])
-        .join("")
-        .toUpperCase()
-    : "??";
+  if (!name) return "??";
+  
+  const parts = name.trim().split(" ").filter(n => n.length > 0);
+  
+  if (parts.length === 0) return "??";
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  
+  // Pega primeira letra do primeiro e último nome
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const capitalizeFirstLetter = (text: string): string => {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+};
+
+const getFirstAndLastName = (name: string | null | undefined): string => {
+  if (!name) return "Usuário";
+  
+  const parts = name.trim().split(" ").filter(n => n.length > 0);
+  
+  if (parts.length === 0) return "Usuário";
+  if (parts.length === 1) return capitalizeFirstLetter(parts[0]);
+  
+  // Retorna primeiro e último nome capitalizados
+  const firstName = capitalizeFirstLetter(parts[0]);
+  const lastName = capitalizeFirstLetter(parts[parts.length - 1]);
+  
+  return `${firstName} ${lastName}`;
+};
+
+const capitalizeFullName = (name: string | null | undefined): string => {
+  if (!name) return "Usuário";
+  
+  const parts = name.trim().split(" ").filter(n => n.length > 0);
+  
+  if (parts.length === 0) return "Usuário";
+  
+  // Capitaliza todas as partes do nome
+  return parts.map(part => capitalizeFirstLetter(part)).join(" ");
 };
 
 const censurarCPF = (cpf: string | null | undefined): string | null => {
@@ -111,11 +143,11 @@ export function Header() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={session?.user?.image || ""}
-                      alt={session?.user?.name || ""}
+                      src={session?.user?.image || null}
+                      alt={session?.user?.name || "Usuário"}
                     />
                     <AvatarFallback className="bg-[#1e7b4f] text-white">
-                      {session?.user?.image ? (
+                      {session?.user?.name ? (
                         getInitials(session?.user?.name)
                       ) : (
                         <User className="h-4 w-4" />
@@ -123,7 +155,7 @@ export function Header() {
                     </AvatarFallback>
                   </Avatar>
                   <span className="text-sm font-medium">
-                    {session?.user?.name?.split(" ")[0]}
+                    {getFirstAndLastName(session?.user?.name)}
                   </span>
                 </Button>
               </DropdownMenuTrigger>
@@ -132,7 +164,7 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <div className="flex flex-col gap-1 w-full">
-                    <span className="font-medium">{session?.user?.name}</span>
+                    <span className="font-medium">{capitalizeFullName(session?.user?.name)}</span>
                     {session?.user?.email && (
                       <span className="text-sm text-gray-500">
                         {session?.user?.email}
@@ -182,20 +214,26 @@ export function Header() {
         <div className="md:hidden mt-4 flex items-center gap-3">
           <Avatar className="h-10 w-10">
             <AvatarImage
-              src={session?.user?.image || ""}
-              alt={session?.user?.name || ""}
+              src={session?.user?.image || null}
+              alt={session?.user?.name || "Usuário"}
             />
             <AvatarFallback className="bg-[#1e7b4f] text-white">
-              {getInitials(session?.user?.name)}
+              {session?.user?.name ? (
+                getInitials(session?.user?.name)
+              ) : (
+                <User className="h-5 w-5" />
+              )}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="text-base font-medium text-[#1e7b4f]">
-              {session?.user?.name}
+              {getFirstAndLastName(session?.user?.name)}
             </span>
-            <span className="text-xs text-gray-500">
-              {session?.user?.email}
-            </span>
+            {session?.user?.email && (
+              <span className="text-xs text-gray-500">
+                {session?.user?.email}
+              </span>
+            )}
           </div>
         </div>
       </header>

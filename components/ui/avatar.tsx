@@ -21,12 +21,21 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
 )
 Avatar.displayName = "Avatar"
 
-export type AvatarImageProps = React.ComponentProps<typeof Image>
+export type AvatarImageProps = Omit<React.ComponentProps<typeof Image>, 'src'> & {
+  src?: string | null
+}
 
 export const AvatarImage = React.forwardRef<
   React.ElementRef<typeof Image>,
   AvatarImageProps
->(({ className, alt = "", width = 40, height = 40, ...props }, ref) => {
+>(({ className, alt = "", width = 40, height = 40, src, ...props }, ref) => {
+  const [hasError, setHasError] = React.useState(false)
+  
+  // Não renderiza se não há src válido ou se houve erro
+  if (!src || hasError) {
+    return null
+  }
+  
   return (
     <Image
       ref={ref}
@@ -34,6 +43,8 @@ export const AvatarImage = React.forwardRef<
       alt={alt}
       width={width}
       height={height}
+      src={src}
+      onError={() => setHasError(true)}
       {...props}
     />
   )
