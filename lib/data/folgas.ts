@@ -32,8 +32,8 @@ interface DisparoListagem {
 }
 
 // Dias de trabalho disponíveis - apenas 2 dias por semana
-const DIAS_SEMANA1 = ["2024-12-22", "2024-12-23"] // Domingo e Segunda
-const DIAS_SEMANA2 = ["2024-12-29", "2024-12-30"] // Domingo e Segunda
+const DIAS_SEMANA1 = ["2024-12-22", "2024-12-23"]
+const DIAS_SEMANA2 = ["2024-12-29", "2024-12-30"]
 
 // Todos os dias de trabalho possíveis
 const TODOS_DIAS_TRABALHO = [...DIAS_SEMANA1, ...DIAS_SEMANA2]

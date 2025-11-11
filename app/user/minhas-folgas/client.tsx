@@ -21,10 +21,10 @@ interface MinhasFolgasData {
 }
 
 const DIAS_PERIODO = [
-  { data: "2024-12-22", label: "22/12", nome: "Domingo" },
-  { data: "2024-12-23", label: "23/12", nome: "Segunda-feira" },
-  { data: "2024-12-29", label: "29/12", nome: "Domingo" },
-  { data: "2024-12-30", label: "30/12", nome: "Segunda-feira" },
+  { data: "2024-12-22", label: "22/12" },
+  { data: "2024-12-23", label: "23/12" },
+  { data: "2024-12-29", label: "29/12" },
+  { data: "2024-12-30", label: "30/12" },
 ]
 
 export default function MinhasFolgasClient() {
@@ -110,9 +110,8 @@ export default function MinhasFolgasClient() {
                 ) : (
                   <div className="space-y-2">
                     {DIAS_PERIODO.filter(dia => verificarFolga(dia.data)).map((dia) => (
-                      <div key={dia.data} className="flex items-center justify-between p-3 bg-white rounded border border-green-200">
+                      <div key={dia.data} className="flex items-center justify-center p-3 bg-white rounded border border-green-200">
                         <span className="font-medium">{dia.label}</span>
-                        <span className="text-sm text-gray-600">{dia.nome}</span>
                       </div>
                     ))}
                   </div>
@@ -131,9 +130,8 @@ export default function MinhasFolgasClient() {
                 ) : (
                   <div className="space-y-2">
                     {DIAS_PERIODO.filter(dia => verificarTrabalho(dia.data)).map((dia) => (
-                      <div key={dia.data} className="flex items-center justify-between p-3 bg-white rounded border border-blue-200">
+                      <div key={dia.data} className="flex items-center justify-center p-3 bg-white rounded border border-blue-200">
                         <span className="font-medium">{dia.label}</span>
-                        <span className="text-sm text-gray-600">{dia.nome}</span>
                       </div>
                     ))}
                   </div>
