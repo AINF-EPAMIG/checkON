@@ -1,5 +1,6 @@
 import { RowDataPacket } from "mysql2"
 import { query } from "@/lib/db/funcionarios"
+import { isNivelChefia } from "@/lib/utils/nivel"
 
 export interface ColaboradorCompleto extends RowDataPacket {
   id: number
@@ -24,15 +25,7 @@ export interface ColaboradorCompleto extends RowDataPacket {
   nivel: string | null
 }
 
-const NIVEL_COLABORADOR = "COLABORADOR"
-
-export function isNivelChefia(nivel: string | null | undefined): boolean {
-  if (!nivel) {
-    return false
-  }
-
-  return nivel.trim().toUpperCase() !== NIVEL_COLABORADOR
-}
+export { isNivelChefia }
 
 const BASE_SELECT = `
   SELECT

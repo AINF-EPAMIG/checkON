@@ -4,6 +4,7 @@ import { GeistSans } from 'geist/font/sans'
 import './globals.css'
 import { AuthProvider } from '@/components/AuthProvider'
 import { Header } from '@/components/Layout/header'
+import { MobileBlocker } from '@/components/MobileBlocker'
 import { usePathname } from 'next/navigation'
 
 export default function RootLayout({
@@ -18,13 +19,15 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={GeistSans.className}>
         <AuthProvider>
-          <div className="min-h-screen flex flex-col">
-            {!isLoginPage && <Header />}
+          <MobileBlocker>
+            <div className="min-h-screen flex flex-col">
+              {!isLoginPage && <Header />}
 
-            <main className="flex-1">
-              {children}
-            </main>
-          </div>
+              <main className="flex-1">
+                {children}
+              </main>
+            </div>
+          </MobileBlocker>
         </AuthProvider>
       </body>
     </html>
