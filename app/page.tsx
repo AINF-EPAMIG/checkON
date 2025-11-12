@@ -1,48 +1,68 @@
 "use client"
 
 import { useSession } from "next-auth/react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState, Suspense } from "react"
 
 function HomeContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const [isRedirecting, setIsRedirecting] = useState(false)
-  const [hasRedirected, setHasRedirected] = useState(false)
+  const pathname = usePathname()
+  const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-      return
-    }
+    let isMounted = true
+    
+    // Reseta o estado toda vez que o efeito roda
+    setIsChecking(true)
 
-    // Verifica se o parâmetro 'stay' está presente ou se já redirecionou nesta sessão
-    const shouldStay = searchParams.get('stay') === 'true' || sessionStorage.getItem('hasVisitedHome') === 'true'
+    // Função assíncrona para lidar com o redirecionamento
+    const checkAndRedirect = async () => {
+      if (status === "unauthenticated") {
+        router.push("/login")
+        return
+      }
 
-    if (status === "authenticated" && session?.user?.colaborador && !isRedirecting && !hasRedirected && !shouldStay) {
-      setIsRedirecting(true)
-      setHasRedirected(true)
-      
-      // Marca que o usuário já visitou a home nesta sessão
-      sessionStorage.setItem('hasVisitedHome', 'true')
-      
-      // Obter a URL de redirecionamento baseada no nível do usuário
-      fetch("/api/auth/redirect-url")
-        .then(res => res.json())
-        .then(data => {
-          if (data.redirectUrl) {
-            router.push(data.redirectUrl)
+      if (status === "loading") {
+        return
+      }
+
+      if (status === "authenticated" && session?.user?.colaborador && isMounted) {
+        const hasVisitedHome = sessionStorage.getItem('hasVisitedHome')
+        
+        if (hasVisitedHome !== 'true') {
+          // Marca que o usuário já visitou a home nesta sessão
+          sessionStorage.setItem('hasVisitedHome', 'true')
+          
+          try {
+            // Obter a URL de redirecionamento baseada no nível do usuário
+            const res = await fetch("/api/auth/redirect-url")
+            const data = await res.json()
+            
+            if (data.redirectUrl && isMounted) {
+              router.push(data.redirectUrl)
+              return // Mantém em "checking" enquanto redireciona
+            }
+          } catch (error) {
+            console.error("Erro ao obter URL de redirecionamento:", error)
           }
-        })
-        .catch(() => {
-          // Em caso de erro, manter na página inicial
-          setIsRedirecting(false)
-        })
+        }
+        
+        // Se já visitou ou não vai redirecionar, para de checar
+        if (isMounted) {
+          setIsChecking(false)
+        }
+      }
     }
-  }, [status, session, router, isRedirecting, hasRedirected, searchParams])
 
-  if (status === "loading" || isRedirecting) {
+    checkAndRedirect()
+
+    return () => {
+      isMounted = false
+    }
+  }, [status, session, router, pathname])
+
+  if (status === "loading" || (status === "authenticated" && isChecking)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
