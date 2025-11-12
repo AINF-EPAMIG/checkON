@@ -62,6 +62,9 @@ function LoginForm() {
       }
 
       if (response?.ok) {
+        // Limpar o sessionStorage para permitir redirecionamento automático
+        sessionStorage.removeItem('hasVisitedHome')
+        
         // Aguardar um momento para garantir que a sessão foi criada
         await new Promise(resolve => setTimeout(resolve, 100))
         
@@ -107,6 +110,9 @@ function LoginForm() {
 
         // Login bem-sucedido - redirecionar
         if (response?.ok) {
+          // Limpar o sessionStorage para permitir redirecionamento automático
+          sessionStorage.removeItem('hasVisitedHome')
+          
           // Aguardar um momento para garantir que a sessão foi criada
           await new Promise(resolve => setTimeout(resolve, 100))
           

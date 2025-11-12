@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { LogOut, Menu, X, Mail, Globe, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,7 @@ export function Header() {
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { isChefe, loading: chefiaLoading } = useChefiaStatus(!!session);
+  const pathname = usePathname();
 
   return (
     <>
@@ -187,7 +189,10 @@ export function Header() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600"
-                  onClick={() => signOut()}
+                  onClick={() => {
+                    sessionStorage.removeItem('hasVisitedHome');
+                    signOut();
+                  }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Sair</span>
@@ -245,7 +250,11 @@ export function Header() {
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link
                 href="/"
-                className="block px-3 py-2 rounded-md text-base font-medium bg-[#165c3c]"
+                className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  pathname === "/" 
+                    ? "bg-[#165c3c]" 
+                    : "hover:bg-[#165c3c]"
+                }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Início
@@ -253,7 +262,11 @@ export function Header() {
               {!chefiaLoading && isChefe && (
                 <Link
                   href="/user/agendar-folga"
-                  className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#165c3c]"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    pathname === "/user/agendar-folga" 
+                      ? "bg-[#165c3c]" 
+                      : "hover:bg-[#165c3c]"
+                  }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Agendar Folga
@@ -262,7 +275,11 @@ export function Header() {
               {!chefiaLoading && !isChefe && (
                 <Link
                   href="/user/minhas-folgas"
-                  className="block px-3 py-2 rounded-md text-base font-medium hover:bg-[#165c3c]"
+                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                    pathname === "/user/minhas-folgas" 
+                      ? "bg-[#165c3c]" 
+                      : "hover:bg-[#165c3c]"
+                  }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Minhas Folgas
@@ -272,6 +289,7 @@ export function Header() {
                 className="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-red-600 text-red-200"
                 onClick={() => {
                   setMobileMenuOpen(false);
+                  sessionStorage.removeItem('hasVisitedHome');
                   signOut();
                 }}
               >
@@ -286,14 +304,22 @@ export function Header() {
             <div className="flex items-center space-x-1">
               <Link
                 href="/"
-                className="px-4 py-2 rounded-md text-sm font-medium bg-[#165c3c] hover:bg-[#165c3c]"
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  pathname === "/" 
+                    ? "bg-[#165c3c]" 
+                    : "hover:bg-[#165c3c]"
+                }`}
               >
                 Início
               </Link>
               {!chefiaLoading && isChefe && (
                 <Link
                   href="/user/agendar-folga"
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-[#165c3c] transition-colors"
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === "/user/agendar-folga" 
+                      ? "bg-[#165c3c]" 
+                      : "hover:bg-[#165c3c]"
+                  }`}
                 >
                   Agendar Folga
                 </Link>
@@ -301,7 +327,11 @@ export function Header() {
               {!chefiaLoading && !isChefe && (
                 <Link
                   href="/user/minhas-folgas"
-                  className="px-4 py-2 rounded-md text-sm font-medium hover:bg-[#165c3c] transition-colors"
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === "/user/minhas-folgas" 
+                      ? "bg-[#165c3c]" 
+                      : "hover:bg-[#165c3c]"
+                  }`}
                 >
                   Minhas Folgas
                 </Link>

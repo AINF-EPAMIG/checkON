@@ -1,26 +1,25 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { GeistSans } from 'geist/font/sans'
 import './globals.css'
 import { AuthProvider } from '@/components/AuthProvider'
 import { Header } from '@/components/Layout/header'
-
-
-export const metadata: Metadata = {
-  title: 'Sistema CheckON',
-  description: 'Sistema CheckON EPAMIG - Empresa de Pesquisa Agropecuária de Minas Gerais',
-}
+import { usePathname } from 'next/navigation'
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const pathname = usePathname()
+  const isLoginPage = pathname === '/login'
+
   return (
     <html lang="pt-BR">
       <body className={GeistSans.className}>
         <AuthProvider>
           <div className="min-h-screen flex flex-col">
-            <Header />
+            {!isLoginPage && <Header />}
 
             <main className="flex-1">
               {children}
