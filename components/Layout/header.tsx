@@ -191,6 +191,7 @@ export function Header() {
                   className="text-red-600"
                   onClick={() => {
                     sessionStorage.removeItem('hasVisitedHome');
+                    sessionStorage.removeItem('isMobileDevice');
                     signOut();
                   }}
                 >
@@ -290,6 +291,7 @@ export function Header() {
                 onClick={() => {
                   setMobileMenuOpen(false);
                   sessionStorage.removeItem('hasVisitedHome');
+                  sessionStorage.removeItem('isMobileDevice');
                   signOut();
                 }}
               >
