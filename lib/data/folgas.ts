@@ -13,30 +13,19 @@ export interface Subordinado {
   funcao: string | null
 }
 
-export type TipoFolga = "semana1" | "semana2" | "nenhuma" | "ambas" | "especifico" | ""
-
 export interface AgendamentoFolga {
   chapa: string
   nome: string
-  tipoFolga: TipoFolga
-  diasEspecificos?: string[] // Array de datas no formato YYYY-MM-DD
+  diasTrabalho: string[] // Array de datas no formato YYYY-MM-DD que o colaborador VAI TRABALHAR
 }
+
+// Todos os dias de trabalho possíveis
+const TODOS_DIAS_TRABALHO = ["2024-12-22", "2024-12-23", "2024-12-29", "2024-12-30"]
 
 interface DisparoListagem {
   chapa: string
-  codigo: string
   data_disparo: string | Date
-  periodo: string
-  status: string
-  data_validacao: Date | null
 }
-
-// Dias de trabalho disponíveis - apenas 2 dias por semana
-const DIAS_SEMANA1 = ["2024-12-22", "2024-12-23"]
-const DIAS_SEMANA2 = ["2024-12-29", "2024-12-30"]
-
-// Todos os dias de trabalho possíveis
-const TODOS_DIAS_TRABALHO = [...DIAS_SEMANA1, ...DIAS_SEMANA2]
 
 /**
  * Busca todos os subordinados ativos de um chefe
@@ -70,34 +59,11 @@ export async function getSubordinados(
 }
 
 /**
- * Calcula as datas de disparo (dias que o colaborador VAI TRABALHAR) baseado nos dias de FOLGA selecionados
+ * Retorna os dias de trabalho diretamente do agendamento
  */
 function calcularDatasDisparo(agendamento: AgendamentoFolga): string[] {
-  switch (agendamento.tipoFolga) {
-    case "semana1":
-      // Folga na semana 1 (22 e 23/12) → Trabalha na semana 2 (29 e 30/12)
-      return DIAS_SEMANA2
-    
-    case "semana2":
-      // Folga na semana 2 (29 e 30/12) → Trabalha na semana 1 (22 e 23/12)
-      return DIAS_SEMANA1
-    
-    case "ambas":
-      // Folga em ambas as semanas → Não trabalha nenhum dia
-      return []
-    
-    case "nenhuma":
-      // Nenhuma folga → Trabalha todos os dias
-      return TODOS_DIAS_TRABALHO
-    
-    case "especifico":
-      // Dias específicos de folga → Trabalha nos outros dias
-      const diasFolga = agendamento.diasEspecificos || []
-      return TODOS_DIAS_TRABALHO.filter(dia => !diasFolga.includes(dia))
-    
-    default:
-      return []
-  }
+  // Agora recebemos diretamente os dias de trabalho
+  return agendamento.diasTrabalho || []
 }
 
 /**
@@ -166,7 +132,8 @@ export async function salvarAgendamentos(
 }
 
 /**
- * Busca os agendamentos existentes para um conjunto de subordinados
+ * Busca os agendamentos existentes (disparos) para um conjunto de subordinados
+ * Retorna um Map com chapa -> Set de datas que o colaborador VAI TRABALHAR
  */
 export async function getAgendamentosExistentes(
   chapas: string[],
@@ -201,47 +168,5 @@ export async function getAgendamentosExistentes(
   }
 
   return mapaDisparos
-}
-
-/**
- * Detecta o tipo de folga baseado nos dias de trabalho agendados
- * Retorna vazio ("") se não houver agendamentos (não tem disparos)
- */
-export function detectarTipoFolga(diasTrabalho: Set<string>, temAgendamento: boolean): {
-  tipoFolga: TipoFolga
-  diasEspecificos: string[]
-} {
-  const diasArray = Array.from(diasTrabalho)
-  
-  // Se não tem agendamento no banco, retorna vazio (sem pré-seleção)
-  if (!temAgendamento) {
-    return { tipoFolga: "", diasEspecificos: [] }
-  }
-  
-  // Nenhum dia de trabalho (mas tem agendamento) = folga em ambas as semanas
-  if (diasArray.length === 0) {
-    return { tipoFolga: "ambas", diasEspecificos: [] }
-  }
-  
-  // Todos os 4 dias = sem folga
-  if (diasArray.length === 4) {
-    return { tipoFolga: "nenhuma", diasEspecificos: [] }
-  }
-  
-  // Apenas dias da semana 1 (22 e 23) = folga na semana 2
-  const temSemana1 = DIAS_SEMANA1.every(dia => diasArray.includes(dia))
-  const temSemana2 = DIAS_SEMANA2.every(dia => diasArray.includes(dia))
-  
-  if (temSemana1 && !temSemana2) {
-    return { tipoFolga: "semana2", diasEspecificos: [] }
-  }
-  
-  if (temSemana2 && !temSemana1) {
-    return { tipoFolga: "semana1", diasEspecificos: [] }
-  }
-  
-  // Dias específicos: inverter para mostrar dias de FOLGA
-  const diasFolga = TODOS_DIAS_TRABALHO.filter(dia => !diasArray.includes(dia))
-  return { tipoFolga: "especifico", diasEspecificos: diasFolga }
 }
 

@@ -7,7 +7,6 @@ import {
   salvarAgendamentos,
   AgendamentoFolga,
   getAgendamentosExistentes,
-  detectarTipoFolga,
 } from "@/lib/data/folgas"
 
 /**
@@ -48,15 +47,16 @@ export async function GET() {
     const agendamentosExistentes = await getAgendamentosExistentes(chapas)
 
     // Adicionar informação de agendamentos para cada subordinado
+    const TODOS_DIAS = ["2024-12-22", "2024-12-23", "2024-12-29", "2024-12-30"]
     const subordinadosComAgendamentos = subordinados.map(sub => {
-      const diasTrabalho = agendamentosExistentes.get(sub.chapa) || new Set()
-      const temAgendamento = diasTrabalho.size > 0
-      const { tipoFolga, diasEspecificos } = detectarTipoFolga(diasTrabalho, temAgendamento)
+      const diasTrabalho = Array.from(agendamentosExistentes.get(sub.chapa) || [])
+      const diasFolga = TODOS_DIAS.filter(dia => !diasTrabalho.includes(dia))
+      const temAgendamento = diasTrabalho.length > 0
       
       return {
         ...sub,
-        tipoFolga,
-        diasEspecificos,
+        diasTrabalho,
+        diasFolga,
         temAgendamento,
       }
     })
@@ -110,21 +110,17 @@ export async function POST(request: NextRequest) {
 
     // Validar que todos os agendamentos têm os campos obrigatórios
     for (const agendamento of agendamentos) {
-      if (!agendamento.chapa || !agendamento.tipoFolga) {
+      if (!agendamento.chapa) {
         return NextResponse.json(
-          { erro: "Cada agendamento deve ter 'chapa' e 'tipoFolga'" },
+          { erro: "Cada agendamento deve ter 'chapa'" },
           { status: 400 },
         )
       }
 
-      if (
-        agendamento.tipoFolga === "especifico" &&
-        (!agendamento.diasEspecificos ||
-          agendamento.diasEspecificos.length === 0)
-      ) {
+      if (!agendamento.diasTrabalho || !Array.isArray(agendamento.diasTrabalho)) {
         return NextResponse.json(
           {
-            erro: "Para tipo 'especifico', é necessário informar 'diasEspecificos'",
+            erro: "Cada agendamento deve ter 'diasTrabalho' como array",
           },
           { status: 400 },
         )
