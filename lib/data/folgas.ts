@@ -20,7 +20,7 @@ export interface AgendamentoFolga {
 }
 
 // Todos os dias de trabalho possíveis
-const TODOS_DIAS_TRABALHO = ["2024-12-22", "2024-12-23", "2024-12-29", "2024-12-30"]
+const TODOS_DIAS_TRABALHO = ["2025-12-22", "2025-12-23", "2025-12-29", "2025-12-30"]
 
 interface DisparoListagem {
   chapa: string

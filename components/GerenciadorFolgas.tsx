@@ -38,10 +38,10 @@ interface AgendamentoState {
 
 // Dias de trabalho disponíveis - apenas 2 dias por semana
 const DIAS_TRABALHO = [
-  { data: "2024-12-22", label: "22/12" },
-  { data: "2024-12-23", label: "23/12" },
-  { data: "2024-12-29", label: "29/12" },
-  { data: "2024-12-30", label: "30/12" },
+  { data: "2025-12-22", label: "22/12" },
+  { data: "2025-12-23", label: "23/12" },
+  { data: "2025-12-29", label: "29/12" },
+  { data: "2025-12-30", label: "30/12" },
 ]
 
 interface GerenciadorFolgasProps {

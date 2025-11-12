@@ -61,7 +61,7 @@ export async function GET() {
       `SELECT DISTINCT chapa, DATE(data_disparo) as data_disparo
        FROM lista_disparo
        WHERE chapa IN (${placeholders})
-         AND DATE(data_disparo) IN ('2024-12-22', '2024-12-23', '2024-12-29', '2024-12-30')
+         AND DATE(data_disparo) IN ('2025-12-22', '2025-12-23', '2025-12-29', '2025-12-30')
        ORDER BY chapa, data_disparo`,
       chapas,
     )

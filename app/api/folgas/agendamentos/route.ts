@@ -47,7 +47,7 @@ export async function GET() {
     const agendamentosExistentes = await getAgendamentosExistentes(chapas)
 
     // Adicionar informação de agendamentos para cada subordinado
-    const TODOS_DIAS = ["2024-12-22", "2024-12-23", "2024-12-29", "2024-12-30"]
+    const TODOS_DIAS = ["2025-12-22", "2025-12-23", "2025-12-29", "2025-12-30"]
     const subordinadosComAgendamentos = subordinados.map(sub => {
       const diasTrabalho = Array.from(agendamentosExistentes.get(sub.chapa) || [])
       const diasFolga = TODOS_DIAS.filter(dia => !diasTrabalho.includes(dia))

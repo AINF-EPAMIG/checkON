@@ -8,7 +8,7 @@ interface DisparoAgendado {
   data_disparo: string | Date
 }
 
-const TODOS_DIAS_PERIODO = ["2024-12-22", "2024-12-23", "2024-12-29", "2024-12-30"]
+const TODOS_DIAS_PERIODO = ["2025-12-22", "2025-12-23", "2025-12-29", "2025-12-30"]
 
 /**
  * GET - Retorna as folgas do colaborador logado

@@ -23,10 +23,10 @@ interface VisualizadorFolgasProps {
 }
 
 const DIAS_PERIODO = [
-  { data: "2024-12-22", label: "22/12" },
-  { data: "2024-12-23", label: "23/12" },
-  { data: "2024-12-29", label: "29/12" },
-  { data: "2024-12-30", label: "30/12" },
+  { data: "2025-12-22", label: "22/12" },
+  { data: "2025-12-23", label: "23/12" },
+  { data: "2025-12-29", label: "29/12" },
+  { data: "2025-12-30", label: "30/12" },
 ]
 
 export default function VisualizadorFolgas({ open, onOpenChange }: VisualizadorFolgasProps) {
