@@ -75,7 +75,7 @@ function LoginForm() {
       <div
         className="absolute inset-0 bg-cover bg-no-repeat"
         style={{
-          backgroundImage: "url(/bg-reserva.svg)",
+          backgroundImage: "url(/bg-checkon.svg)",
           backgroundPosition: "center 20%",
         }}
       />
@@ -83,16 +83,26 @@ function LoginForm() {
       <div className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           <Card className="shadow-lg bg-white/70 backdrop-blur">
-            <CardHeader className="text-center space-y-8">
+            <CardHeader className="text-center space-y-6">
               <div className="flex justify-center">
+                <h1 className="text-4xl font-bold text-black border-l-4 border-[#1e7b4f] pl-4">
+                  CheckON
+                </h1>
+              </div>
+              
+              <div className="flex justify-center py-4">
                 <Image
                   src="/epamig_logo.svg"
                   alt="EPAMIG Logo"
                   width={280}
                   height={120}
                   className="object-contain"
-                  priority
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <h2 className="text-2xl font-bold text-black">Acesso ao Sistema</h2>
+                <p className="text-sm text-gray-600">Faça login para acessar o sistema CheckON</p>
               </div>
             </CardHeader>
 
