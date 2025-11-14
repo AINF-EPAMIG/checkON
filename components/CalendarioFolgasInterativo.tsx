@@ -23,7 +23,6 @@ export default function CalendarioFolgasInterativo() {
   const [subordinados, setSubordinados] = useState<SubordinadoAgendamento[]>([])
   const [subordinadosFiltrados, setSubordinadosFiltrados] = useState<SubordinadoAgendamento[]>([])
   const [carregando, setCarregando] = useState(true)
-  const [salvandoIndividual, setSalvandoIndividual] = useState<Set<string>>(new Set())
   const [salvandoGeral, setSalvandoGeral] = useState(false)
   const [colaboradoresPendentes, setColaboradoresPendentes] = useState<Set<string>>(new Set())
   const [colaboradoresConfirmados, setColaboradoresConfirmados] = useState<Set<string>>(new Set())
@@ -161,62 +160,6 @@ export default function CalendarioFolgasInterativo() {
       
       return novosSubordinados
     })
-  }
-
-  const salvarColaboradorIndividual = async (chapa: string) => {
-    try {
-      setSalvandoIndividual(prev => new Set(prev).add(chapa))
-
-      const colaborador = subordinados.find(sub => sub.chapa === chapa)
-      if (!colaborador) return
-
-      const agendamentos = [{
-        chapa: colaborador.chapa,
-        nome: colaborador.nome,
-        diasTrabalho: colaborador.diasTrabalho,
-      }]
-
-      const response = await fetch("/api/folgas/agendamentos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ agendamentos }),
-      })
-
-      const data = await response.json()
-
-      if (response.ok && data.sucesso) {
-        // Marcar como confirmado e remover de pendentes
-        setColaboradoresConfirmados(prev => new Set(prev).add(chapa))
-        setColaboradoresPendentes(prev => {
-          const novo = new Set(prev)
-          novo.delete(chapa)
-          return novo
-        })
-        
-        setMensagem({
-          tipo: "sucesso",
-          texto: `Agendamento de ${colaborador?.nome} salvo com sucesso!`,
-        })
-        setTimeout(() => setMensagem(null), 3000)
-      } else {
-        throw new Error(data.erro || "Erro ao salvar agendamento")
-      }
-    } catch (error) {
-      console.error("Erro ao salvar:", error)
-      setMensagem({
-        tipo: "erro",
-        texto: "Erro ao salvar agendamento. Tente novamente.",
-      })
-      setTimeout(() => setMensagem(null), 4000)
-    } finally {
-      setSalvandoIndividual(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(chapa)
-        return newSet
-      })
-    }
   }
 
   const salvarTodos = async () => {
