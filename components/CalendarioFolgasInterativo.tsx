@@ -322,6 +322,123 @@ export default function CalendarioFolgasInterativo() {
           </div>
         </div>
 
+        {/* Tutorial/Instruções - Como agendar folgas */}
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-lg border-2 border-amber-300 shadow-sm">
+          <div className="flex items-start gap-3">
+            {/* Ícone de informação */}
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            
+            {/* Conteúdo do tutorial */}
+            <div className="flex-1">
+              <h3 className="font-bold text-lg text-amber-900 mb-3 flex items-center gap-2">
+                📋 Como agendar as folgas dos colaboradores?
+              </h3>
+              
+              <div className="space-y-3 text-sm text-gray-800">
+                {/* Passo 1 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center text-sm">
+                    1
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-900">Localize o colaborador na lista abaixo</p>
+                    <p className="text-gray-700 mt-1">Use a barra de busca para encontrar mais rápido</p>
+                  </div>
+                </div>
+
+                {/* Passo 2 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center text-sm">
+                    2
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-900">Clique nos botões para marcar os dias</p>
+                    <p className="text-gray-700 mt-1">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium mr-2">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Trabalho
+                      </span>
+                      = Colaborador vai trabalhar neste dia
+                    </p>
+                    <p className="text-gray-700 mt-1.5">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-100 text-red-700 font-medium mr-2">
+                        <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        Folga
+                      </span>
+                      = Colaborador vai folgar neste dia
+                    </p>
+                  </div>
+                </div>
+
+                {/* Passo 3 - IMPORTANTE */}
+                <div className="flex gap-3 bg-red-50 -mx-2 px-2 py-2.5 rounded-lg border border-red-200">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-sm">
+                    ⚠️
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-red-900 text-base">ATENÇÃO: Limite de 2 folgas por pessoa!</p>
+                    <p className="text-red-800 mt-1 font-medium">
+                      Cada colaborador pode ter <span className="font-bold underline">no máximo 2 dias de folga</span>. Se tentar marcar mais, o sistema não permitirá salvar.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Passo 4 */}
+                <div className="flex gap-3">
+                  <div className="flex-shrink-0 w-7 h-7 rounded-full bg-amber-500 text-white font-bold flex items-center justify-center text-sm">
+                    3
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-900">Depois de marcar todos, clique em &ldquo;Salvar Todos os Agendamentos&rdquo;</p>
+                    <p className="text-gray-700 mt-1">O botão fica no final da página (role até o fim). <span className="font-semibold text-green-700">Só será salvo quando você clicar neste botão!</span></p>
+                  </div>
+                </div>
+
+                {/* Indicadores de status */}
+                <div className="mt-4 pt-3 border-t border-amber-200">
+                  <p className="font-semibold text-amber-900 mb-2">💡 Entenda os símbolos ao lado do nome:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs">
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+                      <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3.5 h-3.5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="text-gray-700"><strong className="text-green-700">Verde:</strong> Já está salvo</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+                      <div className="w-5 h-5 rounded-full bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3.5 h-3.5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="text-gray-700"><strong className="text-yellow-700">Amarelo:</strong> Tem alterações não salvas</span>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
+                      <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3.5 h-3.5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm0-2a6 6 0 100-12 6 6 0 000 12z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <span className="text-gray-700"><strong className="text-gray-600">Cinza:</strong> Sem mudanças</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Tabela de agendamentos - Desktop */}
         <div className="hidden md:block">
           <div className="border rounded-lg overflow-hidden">
