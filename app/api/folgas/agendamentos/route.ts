@@ -65,7 +65,7 @@ export async function GET() {
         `SELECT id, chapa, nome, cpf, email, cargo, funcao
          FROM vw_colaboradores_completos
          WHERE chapa IN (?, ?, ?)
-         AND status_colaborador = 'ATIVO'`,
+         AND status_colaborador != 'INATIVO'`,
         chapasExtras
       )
       
