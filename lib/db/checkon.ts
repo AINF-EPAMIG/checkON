@@ -9,22 +9,22 @@ const requiredEnv = {
 
 type EnvVar = keyof typeof requiredEnv
 
-function ensureEnv(name: EnvVar): string {
+function ensureEnv(name: EnvVar, allowEmpty: boolean = false): string {
   const value = requiredEnv[name]
 
-  if (!value) {
+  if (!value && !allowEmpty) {
     throw new Error(
       `Variável de ambiente obrigatória ausente: ${name}. Verifique o arquivo .env`,
     )
   }
 
-  return value
+  return value || ""
 }
 
 const poolConfig = {
   host: ensureEnv("DB_CHECKON_HOST"),
   user: ensureEnv("DB_CHECKON_USER"),
-  password: ensureEnv("DB_CHECKON_PASSWORD"),
+  password: ensureEnv("DB_CHECKON_PASSWORD", true),
   database: ensureEnv("DB_CHECKON_DATABASE"),
   waitForConnections: true,
   connectionLimit: 10,

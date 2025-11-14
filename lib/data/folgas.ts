@@ -28,7 +28,7 @@ interface DisparoListagem {
 }
 
 /**
- * Busca todos os subordinados ativos de um chefe
+ * Busca todos os subordinados ativos de um chefe + o próprio chefe
  */
 export async function getSubordinados(
   nomeChefe: string,
@@ -48,11 +48,11 @@ export async function getSubordinados(
         cargo,
         funcao
       FROM vw_colaboradores_completos
-      WHERE chefe = ?
+      WHERE (chefe = ? OR nome = ?)
         AND status_colaborador = 'ATIVO'
       ORDER BY nome ASC
     `,
-    [nomeChefe.trim()],
+    [nomeChefe.trim(), nomeChefe.trim()],
   )
 
   return rows

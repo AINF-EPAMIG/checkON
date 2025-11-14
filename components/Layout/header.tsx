@@ -137,69 +137,75 @@ export function Header() {
               <span className="text-sm">Portal ADM</span>
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="flex items-center gap-2 pl-2 pr-3 ml-2 hover:bg-transparent hover:text-inherit"
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage
-                      src={session?.user?.image || null}
-                      alt={session?.user?.name || "Usuário"}
-                    />
-                    <AvatarFallback className="bg-[#1e7b4f] text-white">
-                      {session?.user?.name ? (
-                        getInitials(session?.user?.name)
-                      ) : (
-                        <User className="h-4 w-4" />
+            {/* Informações do Usuário e Botão Sair */}
+            <div className="flex items-center gap-3 ml-2 pl-3 border-l border-gray-300">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 pl-2 pr-3 hover:bg-gray-100"
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={session?.user?.image || null}
+                        alt={session?.user?.name || "Usuário"}
+                      />
+                      <AvatarFallback className="bg-[#1e7b4f] text-white">
+                        {session?.user?.name ? (
+                          getInitials(session?.user?.name)
+                        ) : (
+                          <User className="h-4 w-4" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium text-gray-700">
+                      {getFirstAndLastName(session?.user?.name)}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-72">
+                  <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <div className="flex flex-col gap-1 w-full">
+                      <span className="font-medium">{capitalizeFullName(session?.user?.name)}</span>
+                      {session?.user?.email && (
+                        <span className="text-sm text-gray-500">
+                          {session?.user?.email}
+                        </span>
                       )}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium">
-                    {getFirstAndLastName(session?.user?.name)}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-72">
-                <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <div className="flex flex-col gap-1 w-full">
-                    <span className="font-medium">{capitalizeFullName(session?.user?.name)}</span>
-                    {session?.user?.email && (
-                      <span className="text-sm text-gray-500">
-                        {session?.user?.email}
-                      </span>
-                    )}
-                    {session?.user?.colaborador?.chapa && (
-                      <span className="text-sm text-gray-600">
-                        <span className="font-medium">Chapa:</span>{" "}
-                        {session.user.colaborador.chapa}
-                      </span>
-                    )}
-                    {session?.user?.colaborador?.cpf && (
-                      <span className="text-sm text-gray-600">
-                        <span className="font-medium">CPF:</span>{" "}
-                        {censurarCPF(session.user.colaborador.cpf)}
-                      </span>
-                    )}
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  className="text-red-600"
-                  onClick={() => {
-                    sessionStorage.removeItem('hasVisitedHome');
-                    sessionStorage.removeItem('isMobileDevice');
-                    signOut();
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sair</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                      {session?.user?.colaborador?.chapa && (
+                        <span className="text-sm text-gray-600">
+                          <span className="font-medium">Chapa:</span>{" "}
+                          {session.user.colaborador.chapa}
+                        </span>
+                      )}
+                      {session?.user?.colaborador?.cpf && (
+                        <span className="text-sm text-gray-600">
+                          <span className="font-medium">CPF:</span>{" "}
+                          {censurarCPF(session.user.colaborador.cpf)}
+                        </span>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Botão Sair Visível */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => {
+                  sessionStorage.removeItem('hasVisitedHome');
+                  sessionStorage.removeItem('isMobileDevice');
+                  signOut();
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="text-sm font-medium">Sair</span>
+              </Button>
+            </div>
           </div>
 
           {/* Menu Mobile Toggle */}

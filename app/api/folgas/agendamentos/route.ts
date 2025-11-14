@@ -49,9 +49,16 @@ export async function GET() {
     // Adicionar informação de agendamentos para cada subordinado
     const TODOS_DIAS = ["2025-12-22", "2025-12-23", "2025-12-29", "2025-12-30"]
     const subordinadosComAgendamentos = subordinados.map(sub => {
-      const diasTrabalho = Array.from(agendamentosExistentes.get(sub.chapa) || [])
+      const agendamentosChapa = agendamentosExistentes.get(sub.chapa)
+      const temAgendamento = agendamentosChapa !== undefined && agendamentosChapa.size > 0
+      
+      // Se NÃO tem agendamento, estado padrão é TRABALHO em todos os dias
+      // Se TEM agendamento, usa o que está salvo
+      const diasTrabalho = temAgendamento 
+        ? Array.from(agendamentosChapa!) 
+        : [...TODOS_DIAS]
+      
       const diasFolga = TODOS_DIAS.filter(dia => !diasTrabalho.includes(dia))
-      const temAgendamento = diasTrabalho.length > 0
       
       return {
         ...sub,
