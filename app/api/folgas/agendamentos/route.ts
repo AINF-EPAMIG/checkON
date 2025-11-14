@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { obterStatusChefia } from "@/lib/services/chefia"
+import { RowDataPacket } from "mysql2"
 import {
   getSubordinados,
   salvarAgendamentos,
@@ -33,6 +34,8 @@ export async function GET() {
     }
 
     const nomeChefe = session.user?.colaborador?.nome
+    const chapaChefe = session.user?.colaborador?.chapa
+    
     if (!nomeChefe) {
       return NextResponse.json(
         { erro: "Nome do chefe não encontrado" },
@@ -40,7 +43,39 @@ export async function GET() {
       )
     }
 
-    const subordinados = await getSubordinados(nomeChefe)
+    let subordinados = await getSubordinados(nomeChefe)
+
+    // Exceção: Chapa 012307 pode agendar para chapas específicas além dos subordinados normais
+    if (chapaChefe === "012307") {
+      const chapasExtras = ["005217", "006664", "099993"]
+      
+      // Buscar dados das chapas extras do banco de dados
+      const { query } = await import("@/lib/db/funcionarios")
+      
+      const subordinadosExtras = await query<{
+        id: number
+        chapa: string
+        nome: string
+        cpf: string | null
+        email: string | null
+        cargo: string | null
+        funcao: string | null
+      } & RowDataPacket>(
+        `SELECT id, chapa, nome, cpf, email, cargo, funcao
+         FROM vw_colaboradores_completos
+         WHERE chapa IN (?, ?, ?)
+         AND status_colaborador = 'ATIVO'`,
+        chapasExtras
+      )
+      
+      // Adicionar as chapas extras aos subordinados (sem duplicar se já estiverem)
+      const chapasExistentes = new Set(subordinados.map(s => s.chapa))
+      subordinadosExtras.forEach(extra => {
+        if (!chapasExistentes.has(extra.chapa)) {
+          subordinados.push(extra)
+        }
+      })
+    }
 
     // Buscar agendamentos existentes
     const chapas = subordinados.map(s => s.chapa)
