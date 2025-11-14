@@ -43,9 +43,10 @@ export async function GET() {
       )
     }
 
-    let subordinados = await getSubordinados(nomeChefe)
+    const subordinadosBase = await getSubordinados(nomeChefe)
 
     // Exceção: Chapa 012307 pode agendar para chapas específicas além dos subordinados normais
+    let subordinados = subordinadosBase
     if (chapaChefe === "012307") {
       const chapasExtras = ["005217", "006664", "099993"]
       
@@ -69,12 +70,11 @@ export async function GET() {
       )
       
       // Adicionar as chapas extras aos subordinados (sem duplicar se já estiverem)
-      const chapasExistentes = new Set(subordinados.map(s => s.chapa))
-      subordinadosExtras.forEach(extra => {
-        if (!chapasExistentes.has(extra.chapa)) {
-          subordinados.push(extra)
-        }
-      })
+      const chapasExistentes = new Set(subordinadosBase.map(s => s.chapa))
+      const extrasUnicos = subordinadosExtras.filter(extra => !chapasExistentes.has(extra.chapa))
+      
+      // Reatribuir com spread operator (imutável e detectável pelo ESLint)
+      subordinados = [...subordinadosBase, ...extrasUnicos]
     }
 
     // Buscar agendamentos existentes
